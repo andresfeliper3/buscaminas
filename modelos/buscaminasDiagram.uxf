@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="14.3.0">
+  <zoom_level>10</zoom_level>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>20</x>
+      <y>90</y>
+      <w>160</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>BuscaminasGUI
+--
+Matriz de casillas
+Cronometro
+--
+
+
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>300</x>
+      <y>80</y>
+      <w>280</w>
+      <h>180</h>
+    </coordinates>
+    <panel_attributes>Casilla
+--
+int numero, row, col, id
+boolean tieneBomba
+boolean descubierta
+ImageIcon imagen
+boolean bgRed
+boolean marcada
+--
+void explotarBomba()
+void cambiarImagen()
+void ampliarZonaCasillas()
+
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+</diagram>
