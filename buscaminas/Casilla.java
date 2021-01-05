@@ -24,15 +24,13 @@ public class Casilla extends JButton {
 		bgRed = false;
 		this.setPreferredSize(new Dimension(casillaSize, casillaSize));
 		//this.setBackground(Color.WHITE);
-		//imagen
-		
 	}
 	//Cambia la imagen y el ícono de la casilla
 	public void setImagen(ImageIcon imagen) {
 		this.imagen = imagen;
 		this.setIcon(imagen);
 	}
-	//Cambia sólamente el ícono de la casilla
+	//Cambia solamente el ícono de la casilla
 	public void cambiarSoloIcono(ImageIcon imagen) {
 		this.setIcon(imagen); 
 	}
