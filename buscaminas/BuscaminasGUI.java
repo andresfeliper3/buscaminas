@@ -17,7 +17,7 @@ public class BuscaminasGUI extends JFrame {
 	// Config general
 	public static final int HEIGHT = 100, WIDTH = 80;
 	public static int ROWS = 8, COLS = 8;
-	private int casillaSize = 30;
+	private int casillaSize = 40;
 	// Gráficos
 	private Casilla[][] casillas;
 	private Cronometro cronometro;
@@ -72,6 +72,7 @@ public class BuscaminasGUI extends JFrame {
 		// matriz de casillas
 		ponerCasillas();
 		repartirBombas();
+		repartirNumeros();
 	}
 
 	// Coloca gráficamente todas las casillas del juego según el nivel escogido
@@ -119,18 +120,98 @@ public class BuscaminasGUI extends JFrame {
 		}
 
 	}
-	//Si recibe true activa las escuchas, si recibe false desactiva las escuchas
+
+	// Reparte los números de las casillas que no tienen bombas
+	int orientacion;
+
+	private void repartirNumeros() {
+		for (int row = 0; row < ROWS; row++) {
+			for (int col = 0; col < COLS; col++) {
+				// Si la casilla no tiene bomba recibe número
+				System.out.println("Casilla a revisar, row " +row+" col " + col);
+				if (!casillas[row][col].isTieneBomba()) {
+					//Dentro de la matriz
+					if (row > 0 && row < ROWS - 1 && col > 0 && col < COLS - 1) {
+						revisarBombas(row, col, -1, -1, 1, 1);
+					}
+					// Límite superior
+					else if (row == 0) {
+						// Superior izquierdo
+						if (col == 0) {
+							revisarBombas(row, col, 0, 0, 1, 1);
+						}
+						// Superior derecho
+						else if (col == COLS - 1) {
+							revisarBombas(row, col, 0, -1, 1, 0);
+						}
+						// sólo superior
+						else {
+							revisarBombas(row, col, 0, -1, 1, 1);
+						}
+					}
+					// Límite inferior
+					else if (row == ROWS - 1) {
+						// inferior izquierdo
+						if (col == 0) {
+							revisarBombas(row, col, -1, 0, 0, 1);
+						}
+						// inferior derecho
+						else if (col == COLS - 1) {
+							revisarBombas(row, col, -1, -1, 0, 0);
+						}
+						// sólo inferior
+						else {
+							revisarBombas(row, col, -1, -1, 0, 1);
+						}
+					}
+					// sólo izquierda
+					else if (col == 0) {
+						revisarBombas(row, col, -1, 0, 1, 1);
+					}
+					// sólo derecha
+					else if (col == COLS - 1) {
+						revisarBombas(row, col, -1, -1, 1, 0);
+					}
+				}
+			}
+		}
+	}
+
+	// Revisa cuántas bombas hay alrededor de una casilla. Recibe las coordenadas de
+	// la casilla en la matriz
+	private void revisarBombas(int row, int col, int rowInit, int colInit, int rowFin, int colFin) {
+		System.out.println("row " +row+" col " + col+" rowinit "+rowInit+" colInit "+colInit+" rowFin "+rowFin+" colFin "+colFin);
+		int counter = 0;
+		for (int i = row + rowInit; i <= row + rowFin; i++) {
+			for (int j = col + colInit; j <= col + colFin; j++) {
+				System.out.println("i vale " + i + " y j vale " + j);
+				if (casillas[i][j].isTieneBomba()) { // Revisa uno de más, la casilla misma
+					counter++;
+				}
+			}
+		}
+		casillas[row][col].setNumero(counter);
+	}
+
+	// Si recibe true activa las escuchas, si recibe false desactiva las escuchas
 	private void disponibilidadEscuchas(boolean bool) {
 		for (int row = 0; row < ROWS; row++) {
 			for (int col = 0; col < COLS; col++) {
-				if(bool) {
+				if (bool) {
 					casillas[row][col].addActionListener(escucha);
-				}
-				else {
+				} else {
 					casillas[row][col].removeActionListener(escucha);
-				}	
+				}
 			}
 		}
+	}
+
+	private void iniciarJuego() {
+		ponerCasillas();
+		repartirBombas();
+		repartirNumeros();
+		pack();
+		setLocationRelativeTo(null);
 	}
 
 	private class Escucha implements ActionListener {
@@ -158,27 +239,20 @@ public class BuscaminasGUI extends JFrame {
 					nivel = 3;
 					break;
 				}
-				ponerCasillas();
-				repartirBombas();
-				pack();
-				setLocationRelativeTo(null);
+				iniciarJuego();
 			} else if (e.getSource() instanceof Casilla) {
 				Casilla casilla = (Casilla) e.getSource();
 				System.out.println("Soy la casilla " + casilla.getId());
 				if (casilla.isTieneBomba()) {
 					estado = 2; // perdiste
-					disponibilidadEscuchas(false); //desactivar escuchas
-					//opción de reinicio
+					disponibilidadEscuchas(false); // desactivar escuchas
+					// opción de reinicio
 					int option = JOptionPane.showConfirmDialog(null, "¿Quieres jugar de nuevo?", "¡Perdiste!",
 							JOptionPane.YES_NO_OPTION);
 					if (option == JOptionPane.YES_OPTION) {
 						// REINICIAR JUEGO
-						ponerCasillas();
-						repartirBombas();
-						pack();
-						setLocationRelativeTo(null);
-					} 
-					else if (option == JOptionPane.NO_OPTION) {
+						iniciarJuego();
+					} else if (option == JOptionPane.NO_OPTION) {
 						System.exit(0);
 					}
 

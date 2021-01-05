@@ -45,9 +45,11 @@ public class Casilla extends JButton {
 
 	public void setNumero(int numero) {
 		this.numero = numero;
+		this.setText(String.valueOf(numero));
+	
 	}
 
-	public boolean isTieneBomba() {
+	public boolean isTieneBomba() {	
 		return tieneBomba;
 	}
 
