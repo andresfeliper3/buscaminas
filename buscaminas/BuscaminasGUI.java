@@ -14,26 +14,28 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 public class BuscaminasGUI extends JFrame {
-	//Config general
+	// Config general
 	public static final int HEIGHT = 100, WIDTH = 80;
 	public static int ROWS = 8, COLS = 8;
 	private int casillaSize = 30;
-	//Gráficos
+	// Gráficos
 	private Casilla[][] casillas;
 	private Cronometro cronometro;
 	private JPanel header, panelJuego;
 	private JComboBox nivelesCaja;
 	private String[] niveles = { "Principante", "Intermedio", "Avanzado" };
 
-	//Atributos del juego
+	// Atributos del juego
 	/*
-	 * Niveles 1: principiantes 
-	 * 2: intermedio 
-	 * 3: avanzado
+	 * Niveles 1: principiantes 2: intermedio 3: avanzado
 	 */
 	private int nivel = 1;
 	private int cantidadBombas = 0;
-	//Adicionales necesarios
+	/*
+	 * Estado 1: en juego 2: perdiste 3: ganaste
+	 */
+	private int estado = 1;
+	// Adicionales necesarios
 	private Random random;
 	private Escucha escucha;
 	private ImageIcon imagen;
@@ -103,19 +105,32 @@ public class BuscaminasGUI extends JFrame {
 			break;
 		}
 		//
-		
-		for(int bomba = 0; bomba < cantidadBombas; bomba++) {
+
+		for (int bomba = 0; bomba < cantidadBombas; bomba++) {
 			int col, row;
-			//Ciclo para garantizar que las bombas se repartan en casillas diferentes
+			// Ciclo para garantizar que las bombas se repartan en casillas diferentes
 			do {
 				col = random.nextInt(COLS);
 				row = random.nextInt(ROWS);
-			} while(casillas[row][col].isTieneBomba());	
+			} while (casillas[row][col].isTieneBomba());
 			imagen = new ImageIcon("src/recursos/bomba.jpg");
 			casillas[row][col].setTieneBomba(true);
 			casillas[row][col].setImagen(imagen);
 		}
-		
+
+	}
+	//Si recibe true activa las escuchas, si recibe false desactiva las escuchas
+	private void disponibilidadEscuchas(boolean bool) {
+		for (int row = 0; row < ROWS; row++) {
+			for (int col = 0; col < COLS; col++) {
+				if(bool) {
+					casillas[row][col].addActionListener(escucha);
+				}
+				else {
+					casillas[row][col].removeActionListener(escucha);
+				}	
+			}
+		}
 	}
 
 	private class Escucha implements ActionListener {
@@ -150,6 +165,24 @@ public class BuscaminasGUI extends JFrame {
 			} else if (e.getSource() instanceof Casilla) {
 				Casilla casilla = (Casilla) e.getSource();
 				System.out.println("Soy la casilla " + casilla.getId());
+				if (casilla.isTieneBomba()) {
+					estado = 2; // perdiste
+					disponibilidadEscuchas(false); //desactivar escuchas
+					//opción de reinicio
+					int option = JOptionPane.showConfirmDialog(null, "¿Quieres jugar de nuevo?", "¡Perdiste!",
+							JOptionPane.YES_NO_OPTION);
+					if (option == JOptionPane.YES_OPTION) {
+						// REINICIAR JUEGO
+						ponerCasillas();
+						repartirBombas();
+						pack();
+						setLocationRelativeTo(null);
+					} 
+					else if (option == JOptionPane.NO_OPTION) {
+						System.exit(0);
+					}
+
+				}
 
 			}
 
