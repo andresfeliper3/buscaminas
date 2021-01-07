@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import java.util.Random;
 
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -23,6 +24,8 @@ public class BuscaminasGUI extends JFrame {
 	private Cronometro cronometro;
 	private JPanel header, panelJuego;
 	private JComboBox nivelesCaja;
+	private JButton bandera;
+	private boolean estadoBandera = false; //true si pone bandera, false en caso contrario (bomba)
 	private String[] niveles = { "Principante", "Intermedio", "Avanzado" };
 
 	// Atributos del juego
@@ -62,6 +65,12 @@ public class BuscaminasGUI extends JFrame {
 		// componentes
 		header = new JPanel();
 		add(header, BorderLayout.NORTH);
+		//botón de bandera
+		bandera = new JButton(new ImageIcon("src/recursos/bandera.jpg"));
+		bandera.setBorder(null);
+		bandera.setContentAreaFilled(true);
+		bandera.addActionListener(escucha);
+		header.add(bandera);
 		// caja de niveles
 		nivelesCaja = new JComboBox(niveles);
 		nivelesCaja.addActionListener(escucha);
@@ -75,6 +84,7 @@ public class BuscaminasGUI extends JFrame {
 		repartirNumeros();
 	}
 
+	
 	// Coloca gráficamente todas las casillas del juego según el nivel escogido
 	private void ponerCasillas() {
 		panelJuego.removeAll();
@@ -205,6 +215,17 @@ public class BuscaminasGUI extends JFrame {
 			}
 		}
 	}
+	//Cambia la imagen del botón bandera y lo que ocurre al hacer click en una casilla
+	private void cambiarEstadoBandera() {
+		if(estadoBandera) {
+			bandera.setIcon(new ImageIcon("src/recursos/bomba.jpg"));
+			estadoBandera = false;
+		}
+		else {
+			bandera.setIcon(new ImageIcon("src/recursos/bandera.jpg"));
+			estadoBandera = true;
+		}
+	}
 
 	private void iniciarJuego() {
 		ponerCasillas();
@@ -240,7 +261,14 @@ public class BuscaminasGUI extends JFrame {
 					break;
 				}
 				iniciarJuego();
-			} else if (e.getSource() instanceof Casilla) {
+			} 
+			else if(e.getSource() instanceof JButton) {
+				JButton boton = (JButton) e.getSource();
+				if(boton == bandera) {
+					cambiarEstadoBandera();
+				}
+			}
+			else if (e.getSource() instanceof Casilla) {
 				Casilla casilla = (Casilla) e.getSource();
 				System.out.println("Soy la casilla " + casilla.getId());
 				if (casilla.isTieneBomba()) {
