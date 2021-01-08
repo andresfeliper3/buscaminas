@@ -242,7 +242,10 @@ public class BuscaminasGUI extends JFrame {
 			}
 		}
 	}
-	
+	//Descubre casillas adyacentes cuyo número es 0 (no limitan con una bomba)
+	private void descubrirVariasCasillas(Casilla casilla) {
+		
+	}
 	//Inicia elementos del juego
 	private void iniciarJuego() {
 		ponerCasillas();
@@ -252,6 +255,7 @@ public class BuscaminasGUI extends JFrame {
 		setLocationRelativeTo(null);
 	}
 
+	
 	private class Escucha implements ActionListener {
 
 		@Override
