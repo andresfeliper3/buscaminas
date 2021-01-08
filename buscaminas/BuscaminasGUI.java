@@ -17,6 +17,8 @@ import javax.swing.JPanel;
 public class BuscaminasGUI extends JFrame {
 	// Config general
 	public static final int HEIGHT = 100, WIDTH = 80;
+	private static final String rutaBandera = "src/recursos/bandera.jpg";
+	private static final String rutaBomba = "src/recursos/bomba.jpg";
 	public static int ROWS = 8, COLS = 8;
 	private int casillaSize = 40;
 	// Gráficos
@@ -66,7 +68,7 @@ public class BuscaminasGUI extends JFrame {
 		header = new JPanel();
 		add(header, BorderLayout.NORTH);
 		//botón de bandera
-		bandera = new JButton(new ImageIcon("src/recursos/bandera.jpg"));
+		bandera = new JButton(new ImageIcon(rutaBomba));
 		bandera.setBorder(null);
 		bandera.setContentAreaFilled(true);
 		bandera.addActionListener(escucha);
@@ -124,7 +126,7 @@ public class BuscaminasGUI extends JFrame {
 				col = random.nextInt(COLS);
 				row = random.nextInt(ROWS);
 			} while (casillas[row][col].isTieneBomba());
-			imagen = new ImageIcon("src/recursos/bomba.jpg");
+			imagen = new ImageIcon(rutaBomba);
 			casillas[row][col].setTieneBomba(true);
 			casillas[row][col].setImagen(imagen);
 		}
@@ -218,15 +220,30 @@ public class BuscaminasGUI extends JFrame {
 	//Cambia la imagen del botón bandera y lo que ocurre al hacer click en una casilla
 	private void cambiarEstadoBandera() {
 		if(estadoBandera) {
-			bandera.setIcon(new ImageIcon("src/recursos/bomba.jpg"));
+			bandera.setIcon(new ImageIcon(rutaBomba));
 			estadoBandera = false;
 		}
 		else {
-			bandera.setIcon(new ImageIcon("src/recursos/bandera.jpg"));
+			bandera.setIcon(new ImageIcon(rutaBandera));
 			estadoBandera = true;
 		}
 	}
 
+	//Poner la bandera sobre una casilla si está vacía, si ya tiene una bandera la quita
+	private void ponerQuitarBandera(Casilla casilla) {
+		if(!casilla.isDescubierta()) { //verifica que no se haya descubierto lo que tiene la casilla
+			if(casilla.isMarcada()) {
+				casilla.setMarcada(false);
+				casilla.setIcon(null);
+			}
+			else {
+				casilla.setMarcada(true);
+				casilla.setIcon(new ImageIcon(rutaBandera));
+			}
+		}
+	}
+	
+	//Inicia elementos del juego
 	private void iniciarJuego() {
 		ponerCasillas();
 		repartirBombas();
@@ -262,30 +279,40 @@ public class BuscaminasGUI extends JFrame {
 				}
 				iniciarJuego();
 			} 
+			else if (e.getSource() instanceof Casilla) {
+				Casilla casilla = (Casilla) e.getSource();
+				System.out.println("Soy la casilla " + casilla.getId());
+				//Si está seleccionada la bandera
+				if(estadoBandera) {
+					ponerQuitarBandera(casilla);
+				}
+				//Si está seleccionada la bomba
+				else {
+					casilla.setDescubierta(true);
+					if (casilla.isTieneBomba()) {
+						estado = 2; // perdiste
+						disponibilidadEscuchas(false); // desactivar escuchas
+						// opción de reinicio
+						int option = JOptionPane.showConfirmDialog(null, "¿Quieres jugar de nuevo?", "¡Perdiste!",
+								JOptionPane.YES_NO_OPTION);
+						if (option == JOptionPane.YES_OPTION) {
+							// REINICIAR JUEGO
+							iniciarJuego();
+						} else if (option == JOptionPane.NO_OPTION) {
+							System.exit(0);
+						}
+					}
+					//Si la casilla no tiene bomba, aparece el número
+					else {
+						casilla.mostrarNumero();
+					}
+				}
+			}
 			else if(e.getSource() instanceof JButton) {
 				JButton boton = (JButton) e.getSource();
 				if(boton == bandera) {
 					cambiarEstadoBandera();
 				}
-			}
-			else if (e.getSource() instanceof Casilla) {
-				Casilla casilla = (Casilla) e.getSource();
-				System.out.println("Soy la casilla " + casilla.getId());
-				if (casilla.isTieneBomba()) {
-					estado = 2; // perdiste
-					disponibilidadEscuchas(false); // desactivar escuchas
-					// opción de reinicio
-					int option = JOptionPane.showConfirmDialog(null, "¿Quieres jugar de nuevo?", "¡Perdiste!",
-							JOptionPane.YES_NO_OPTION);
-					if (option == JOptionPane.YES_OPTION) {
-						// REINICIAR JUEGO
-						iniciarJuego();
-					} else if (option == JOptionPane.NO_OPTION) {
-						System.exit(0);
-					}
-
-				}
-
 			}
 
 		}
