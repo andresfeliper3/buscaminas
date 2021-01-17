@@ -27,7 +27,7 @@ public class BuscaminasGUI extends JFrame {
 	private JPanel header, panelJuego;
 	private JComboBox nivelesCaja;
 	private JButton bandera;
-	private boolean estadoBandera = false; //true si pone bandera, false en caso contrario (bomba)
+	private boolean estadoBandera = false; // true si pone bandera, false en caso contrario (bomba)
 	private String[] niveles = { "Principante", "Intermedio", "Avanzado" };
 
 	// Atributos del juego
@@ -67,7 +67,7 @@ public class BuscaminasGUI extends JFrame {
 		// componentes
 		header = new JPanel();
 		add(header, BorderLayout.NORTH);
-		//botón de bandera
+		// botón de bandera
 		bandera = new JButton(new ImageIcon(rutaBomba));
 		bandera.setBorder(null);
 		bandera.setContentAreaFilled(true);
@@ -86,7 +86,6 @@ public class BuscaminasGUI extends JFrame {
 		repartirNumeros();
 	}
 
-	
 	// Coloca gráficamente todas las casillas del juego según el nivel escogido
 	private void ponerCasillas() {
 		panelJuego.removeAll();
@@ -134,15 +133,14 @@ public class BuscaminasGUI extends JFrame {
 	}
 
 	// Reparte los números de las casillas que no tienen bombas
-	int orientacion;
 
 	private void repartirNumeros() {
 		for (int row = 0; row < ROWS; row++) {
 			for (int col = 0; col < COLS; col++) {
 				// Si la casilla no tiene bomba recibe número
-				System.out.println("Casilla a revisar, row " +row+" col " + col);
+				System.out.println("Casilla a revisar, row " + row + " col " + col);
 				if (!casillas[row][col].isTieneBomba()) {
-					//Dentro de la matriz
+					// Dentro de la matriz
 					if (row > 0 && row < ROWS - 1 && col > 0 && col < COLS - 1) {
 						revisarBombas(row, col, -1, -1, 1, 1);
 					}
@@ -190,9 +188,11 @@ public class BuscaminasGUI extends JFrame {
 	}
 
 	// Revisa cuántas bombas hay alrededor de una casilla. Recibe las coordenadas de
-	// la casilla en la matriz
+	// la casilla en la matriz y otros parámetros que ayudan a la abstracción en la
+	// iteración
 	private void revisarBombas(int row, int col, int rowInit, int colInit, int rowFin, int colFin) {
-		System.out.println("row " +row+" col " + col+" rowinit "+rowInit+" colInit "+colInit+" rowFin "+rowFin+" colFin "+colFin);
+		System.out.println("row " + row + " col " + col + " rowinit " + rowInit + " colInit " + colInit + " rowFin "
+				+ rowFin + " colFin " + colFin);
 		int counter = 0;
 		for (int i = row + rowInit; i <= row + rowFin; i++) {
 			for (int j = col + colInit; j <= col + colFin; j++) {
@@ -203,6 +203,21 @@ public class BuscaminasGUI extends JFrame {
 			}
 		}
 		casillas[row][col].setNumero(counter);
+	}
+
+	// Descubre las casillas que tienen ceros (vacías) alrededor de una casilla que
+	// ya tiene cero (está vacía)
+	private void descubrirCasillas(int row, int col, int rowInit, int colInit, int rowFin, int colFin) {
+		for (int i = row + rowInit; i <= row + rowFin; i++) {
+			for (int j = col + colInit; j <= col + colFin; j++) {
+				System.out.println("i vale " + i + " y j vale " + j);
+				if (casillas[i][j].getNumero() == 0) { // Revisa uno de más, la casilla misma
+					casillas[i][j].setDescubierta(true);
+					// VER: MOSTRAR NÚMERO CERO O ALGO ILUSTRATIVO
+					casillas[i][j].setText(String.valueOf(casillas[i][j].getNumero()));
+				}
+			}
+		}
 	}
 
 	// Si recibe true activa las escuchas, si recibe false desactiva las escuchas
@@ -217,36 +232,88 @@ public class BuscaminasGUI extends JFrame {
 			}
 		}
 	}
-	//Cambia la imagen del botón bandera y lo que ocurre al hacer click en una casilla
+
+	// Cambia la imagen del botón bandera y lo que ocurre al hacer click en una
+	// casilla
 	private void cambiarEstadoBandera() {
-		if(estadoBandera) {
+		if (estadoBandera) {
 			bandera.setIcon(new ImageIcon(rutaBomba));
 			estadoBandera = false;
-		}
-		else {
+		} else {
 			bandera.setIcon(new ImageIcon(rutaBandera));
 			estadoBandera = true;
 		}
 	}
 
-	//Poner la bandera sobre una casilla si está vacía, si ya tiene una bandera la quita
+	// Poner la bandera sobre una casilla si está vacía, si ya tiene una bandera la
+	// quita
 	private void ponerQuitarBandera(Casilla casilla) {
-		if(!casilla.isDescubierta()) { //verifica que no se haya descubierto lo que tiene la casilla
-			if(casilla.isMarcada()) {
+		if (!casilla.isDescubierta()) { // verifica que no se haya descubierto lo que tiene la casilla
+			if (casilla.isMarcada()) {
 				casilla.setMarcada(false);
 				casilla.setIcon(null);
-			}
-			else {
+			} else {
 				casilla.setMarcada(true);
 				casilla.setIcon(new ImageIcon(rutaBandera));
 			}
 		}
 	}
-	//Descubre casillas adyacentes cuyo número es 0 (no limitan con una bomba)
-	private void descubrirVariasCasillas(Casilla casilla) {
-		
+
+	// Descubre casillas adyacentes cuyo número es 0 (no limitan con una bomba)
+	private void clickEnCasillaVacia(Casilla casilla) {
+		int row = casilla.getRow();
+		int col = casilla.getCol();
+
+		// Si la casilla no tiene bomba recibe número
+		System.out.println("Casilla a revisar, row " + row + " col " + col);
+		if (casillas[row][col].getNumero() == 0) {
+			// Dentro de la matriz
+			if (row > 0 && row < ROWS - 1 && col > 0 && col < COLS - 1) {
+				descubrirCasillas(row, col, -1, -1, 1, 1);
+			}
+			// Límite superior
+			else if (row == 0) {
+				// Superior izquierdo
+				if (col == 0) {
+					descubrirCasillas(row, col, 0, 0, 1, 1);
+				}
+				// Superior derecho
+				else if (col == COLS - 1) {
+					descubrirCasillas(row, col, 0, -1, 1, 0);
+				}
+				// sólo superior
+				else {
+					descubrirCasillas(row, col, 0, -1, 1, 1);
+				}
+			}
+			// Límite inferior
+			else if (row == ROWS - 1) {
+				// inferior izquierdo
+				if (col == 0) {
+					descubrirCasillas(row, col, -1, 0, 0, 1);
+				}
+				// inferior derecho
+				else if (col == COLS - 1) {
+					descubrirCasillas(row, col, -1, -1, 0, 0);
+				}
+				// sólo inferior
+				else {
+					descubrirCasillas(row, col, -1, -1, 0, 1);
+				}
+			}
+			// sólo izquierda
+			else if (col == 0) {
+				descubrirCasillas(row, col, -1, 0, 1, 1);
+			}
+			// sólo derecha
+			else if (col == COLS - 1) {
+				descubrirCasillas(row, col, -1, -1, 1, 0);
+			}
+		}
+
 	}
-	//Inicia elementos del juego
+
+	// Inicia elementos del juego
 	private void iniciarJuego() {
 		ponerCasillas();
 		repartirBombas();
@@ -255,7 +322,6 @@ public class BuscaminasGUI extends JFrame {
 		setLocationRelativeTo(null);
 	}
 
-	
 	private class Escucha implements ActionListener {
 
 		@Override
@@ -282,15 +348,14 @@ public class BuscaminasGUI extends JFrame {
 					break;
 				}
 				iniciarJuego();
-			} 
-			else if (e.getSource() instanceof Casilla) {
+			} else if (e.getSource() instanceof Casilla) {
 				Casilla casilla = (Casilla) e.getSource();
 				System.out.println("Soy la casilla " + casilla.getId());
-				//Si está seleccionada la bandera
-				if(estadoBandera) {
+				// Si está seleccionada la bandera
+				if (estadoBandera) {
 					ponerQuitarBandera(casilla);
 				}
-				//Si está seleccionada la bomba
+				// Si está seleccionada la bomba
 				else {
 					casilla.setDescubierta(true);
 					if (casilla.isTieneBomba()) {
@@ -303,18 +368,20 @@ public class BuscaminasGUI extends JFrame {
 							// REINICIAR JUEGO
 							iniciarJuego();
 						} else if (option == JOptionPane.NO_OPTION) {
+							//Cerrar juego
 							System.exit(0);
 						}
 					}
-					//Si la casilla no tiene bomba, aparece el número
+					// Si la casilla no tiene bomba, aparece el número
 					else {
 						casilla.mostrarNumero();
+						//Revisar las que no tengan contacto con una bomba
+						clickEnCasillaVacia(casilla);
 					}
 				}
-			}
-			else if(e.getSource() instanceof JButton) {
+			} else if (e.getSource() instanceof JButton) {
 				JButton boton = (JButton) e.getSource();
-				if(boton == bandera) {
+				if (boton == bandera) {
 					cambiarEstadoBandera();
 				}
 			}
