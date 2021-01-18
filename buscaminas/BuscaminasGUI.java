@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.Random;
 
 import javax.swing.ImageIcon;
@@ -205,6 +206,7 @@ public class BuscaminasGUI extends JFrame {
 		casillas[row][col].setNumero(counter);
 	}
 
+	ArrayList<Casilla> casillasVaciasEnLista = new ArrayList<Casilla>();
 	// Descubre las casillas que tienen ceros (vacías) alrededor de una casilla que
 	// ya tiene cero (está vacía)
 	private void descubrirCasillas(int row, int col, int rowInit, int colInit, int rowFin, int colFin) {
@@ -215,11 +217,19 @@ public class BuscaminasGUI extends JFrame {
 					casillas[i][j].setDescubierta(true);
 					// VER: MOSTRAR NÚMERO CERO O ALGO ILUSTRATIVO
 					casillas[i][j].setText(String.valueOf(casillas[i][j].getNumero()));
+					casillasVaciasEnLista.add(casillas[i][j]);
+					//System.out.println("Entra a recursión con casilla " + casillas[i][j].getRow() + " y " + casillas[i][j].getCol());
+					//clickEnCasillaVacia(casillas[i][j]);
 				}
 			}
 		}
 	}
-
+	//Recibe una lista de casillas y las recorre para descubrir a los ceros que la rodean
+	private void descubrirCasillasVaciasLejanas(ArrayList<Casilla> casillas) {
+		ArrayList<Casilla> copiaDeCasillasVacias = (ArrayList<Casilla>) casillasVaciasEnLista.clone();
+		
+		
+	}
 	// Si recibe true activa las escuchas, si recibe false desactiva las escuchas
 	private void disponibilidadEscuchas(boolean bool) {
 		for (int row = 0; row < ROWS; row++) {
@@ -266,7 +276,7 @@ public class BuscaminasGUI extends JFrame {
 
 		// Si la casilla no tiene bomba recibe número
 		System.out.println("Casilla a revisar, row " + row + " col " + col);
-		if (casillas[row][col].getNumero() == 0) {
+		if (casillas[row][col].getNumero() == 0 && !casillas[row][col].isDescubierta()) {
 			// Dentro de la matriz
 			if (row > 0 && row < ROWS - 1 && col > 0 && col < COLS - 1) {
 				descubrirCasillas(row, col, -1, -1, 1, 1);
@@ -357,7 +367,7 @@ public class BuscaminasGUI extends JFrame {
 				}
 				// Si está seleccionada la bomba
 				else {
-					casilla.setDescubierta(true);
+					
 					if (casilla.isTieneBomba()) {
 						estado = 2; // perdiste
 						disponibilidadEscuchas(false); // desactivar escuchas
@@ -377,7 +387,9 @@ public class BuscaminasGUI extends JFrame {
 						casilla.mostrarNumero();
 						//Revisar las que no tengan contacto con una bomba
 						clickEnCasillaVacia(casilla);
+						descubrirCasillasVaciasLejanas(casillasVaciasEnLista);
 					}
+					casilla.setDescubierta(true);
 				}
 			} else if (e.getSource() instanceof JButton) {
 				JButton boton = (JButton) e.getSource();
