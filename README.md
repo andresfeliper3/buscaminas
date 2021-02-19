@@ -1,2 +1,2 @@
 # buscaminas
-prueba
+la prueba
